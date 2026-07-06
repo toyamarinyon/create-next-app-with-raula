@@ -17,14 +17,14 @@ Determine the target directory before running `create-next-app`:
 Initialize the app:
 
 ```bash
-pnpm create next-app@latest <target-directory-or-.> --ts --empty --app --eslint --biome --tailwind --react-compiler --pnpm
+pnpm create next-app@latest <target-directory-or-.> --ts --empty --app --eslint --biome --tailwind --react-compiler --pnpm --skip-install
 ```
 
-Use the create-next-app options exactly as shown above.
+Use the create-next-app options exactly as shown above, including `--skip-install`. Without it, a failure during `create-next-app`'s own install step aborts the scaffold before files like AGENTS.md/CLAUDE.md are written. Skipping the install decouples scaffolding from installing, so the scaffold always completes.
 
 After `create-next-app` finishes, change into the generated app directory before running the remaining commands. If the target was `.`, stay in the current working directory.
 
-If create-next-app aborts because pnpm ignored build scripts for `sharp` and `unrs-resolver`, approve those builds and install again:
+pnpm always ignores build scripts for `sharp` and `unrs-resolver` on a fresh install, which aborts a plain `pnpm install`. Approve those builds first, then install:
 
 ```bash
 pnpm approve-builds sharp unrs-resolver
