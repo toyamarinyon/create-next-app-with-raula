@@ -1,57 +1,72 @@
 ---
 name: create-next-app-with-raula
-description: "Scaffold a new Next.js application with create-next-app in a user-specified directory or, when no target path is given, the current directory; then install and initialize eslint-plugin-raula, run lint and format, and commit the initialized app. Use when the user asks to start, create, bootstrap, or initialize a Next.js app with raula/eslint-plugin-raula."
+description: "Scaffold a new Next.js application with create-next-app in a user-specified directory or, when no target path is given, the current directory; then install and initialize eslint-plugin-raula, run lint and format, and commit the initialized app. Supports pnpm, npm, yarn, and bun. Use when the user asks to start, create, bootstrap, or initialize a Next.js app with raula/eslint-plugin-raula."
 ---
 
 # Create Next App With Raula
 
 ## Workflow
 
-Determine the target directory before running `create-next-app`:
+Determine the package manager and target directory before running `create-next-app`:
 
+- If the user names a package manager (pnpm, npm, yarn, bun), use it. Otherwise default to pnpm.
 - If the user gives a path, pass that path to `create-next-app`.
 - If the user does not give a path, pass `.` to `create-next-app` and use the current working directory.
 - Do not ask for a project name. The target directory is the project directory.
 - Before scaffolding into an existing directory, inspect it. If it contains files unrelated to this setup, stop and ask the user whether to continue, choose another directory, or clean it up.
 
-Initialize the app:
+Every command below depends on the chosen package manager. Use this table to translate each step:
+
+| Step | pnpm | npm | yarn (classic) | bun |
+|---|---|---|---|---|
+| Scaffold | `pnpm create next-app@latest <target> ... --use-pnpm --skip-install` | `npx create-next-app@latest <target> ... --use-npm --skip-install` | `yarn create next-app <target> ... --use-yarn --skip-install` | `bunx create-next-app@latest <target> ... --use-bun --skip-install` |
+| Install deps | `pnpm install` | `npm install` | `yarn install` | `bun install` |
+| Add exact dev dependency | `pnpm add -DE <pkg>@latest --config.minimumReleaseAge=0` | `npm install -D -E <pkg>@latest` | `yarn add -D -E <pkg>@latest` | `bun add -d --exact <pkg>@latest` |
+| Run a package's bin | `pnpm <pkg> <args>` | `npx <pkg> <args>` | `yarn <pkg> <args>` | `bunx <pkg> <args>` |
+| Run a package.json script | `pnpm <script>` | `npm run <script>` | `yarn <script>` | `bun run <script>` |
+
+Initialize the app (fill in the scaffold command from the table above):
 
 ```bash
-pnpm create next-app@latest <target-directory-or-.> --ts --empty --app --eslint --biome --tailwind --react-compiler --pnpm --skip-install
+<scaffold command> --ts --empty --app --eslint --biome --tailwind --react-compiler --skip-install
 ```
 
 Use the create-next-app options exactly as shown above, including `--skip-install`. Without it, a failure during `create-next-app`'s own install step aborts the scaffold before files like AGENTS.md/CLAUDE.md are written. Skipping the install decouples scaffolding from installing, so the scaffold always completes.
 
 After `create-next-app` finishes, change into the generated app directory before running the remaining commands. If the target was `.`, stay in the current working directory.
 
-pnpm always ignores build scripts for `sharp` and `unrs-resolver` on a fresh install, which aborts a plain `pnpm install`. Approve those builds first, then install:
+If pnpm is the package manager, it always ignores build scripts for `sharp` and `unrs-resolver` on a fresh install, which aborts a plain `pnpm install`. Approve those builds first, then install:
 
 ```bash
 pnpm approve-builds sharp unrs-resolver
 pnpm install
 ```
 
-Then continue:
+For npm, yarn, and bun, just run the install command from the table above; none of them block these build scripts by default.
 
-```bash
-pnpm add -DE eslint-plugin-raula@latest --config.minimumReleaseAge=0
-pnpm eslint-plugin-raula install --eslint --agents-md
-pnpm add -DE @biomejs/biome --config.minimumReleaseAge=0
-pnpm biome init
-pnpm lint
-pnpm format
-git add .
-git commit -m "initialized raula"
-```
+Then continue, substituting each step from the table (`<pkg>` add commands, bin invocations, and script runs):
 
-Before running `pnpm format`, ensure `package.json` has a format script:
+1. Add `eslint-plugin-raula@latest` as an exact dev dependency.
+2. Run the package's own installer: `eslint-plugin-raula install --eslint --agents-md`.
+3. Add `@biomejs/biome` as an exact dev dependency.
+4. Run `biome init`.
+5. Run the `lint` script.
+6. Run the `format` script.
+7. `git add .`
+8. `git commit -m "initialized raula"`
+
+Before running the `format` script, ensure `package.json` has a format script:
 
 ```json
 "format": "biome format --write ."
 ```
 
+The pnpm-specific `--config.minimumReleaseAge=0` flag bypasses pnpm's minimum-release-age gate; it has no equivalent on npm/yarn/bun and should be omitted for those.
+
 ## Notes
 
-Run the commands yourself one step at a time rather than delegating the full flow to a shell script. This makes it easier to handle interactive prompts, approve pnpm build scripts, and resume cleanly after partial failures.
+Run the commands yourself one step at a time rather than delegating the full flow to a shell script. This makes it easier to handle interactive prompts, approve build scripts, and resume cleanly after partial failures.
+
+If an install step fails because the package manager blocked or ignored a native dependency's build script (e.g. `sharp`, `unrs-resolver`), look up that package manager's current mechanism for trusting/allowing build scripts (pnpm: `approve-builds`; bun: `pm trust`; yarn/npm vary by version) and retry, rather than assuming the pnpm-specific steps above apply.
 
 If a command fails partway through, inspect the output, fix the concrete problem in the generated app, then continue from the failed step without recreating the project unless the user asks for a clean retry.
