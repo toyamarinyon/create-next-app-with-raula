@@ -96,23 +96,16 @@ template, App Router, ESLint, Biome, Tailwind CSS, React Compiler, and
 
 Then it changes into the generated app directory and continues:
 
+It changes `formatter.indentStyle` to `"tab"` in `biome.json` or
+`biome.jsonc` while preserving the rest of the configuration.
+
 ```bash
 pnpm add -DE eslint-plugin-raula@latest --config.minimumReleaseAge=0
 pnpm eslint-plugin-raula install --eslint --agents-md
-pnpm add -DE @biomejs/biome --config.minimumReleaseAge=0
-pnpm biome init
 pnpm lint
 pnpm format
 git add .
 git commit -m "initialized raula"
-```
-
-Before running `pnpm format`, the skill ensures `package.json` has this script:
-
-```json
-{
-  "format": "biome format --write ."
-}
 ```
 
 If pnpm blocks build scripts for `sharp` or `unrs-resolver`, the skill approves

@@ -65,25 +65,16 @@ Then continue, substituting each step from the table (`<pkg>` add commands, bin 
 
 1. Add `eslint-plugin-raula@latest` as an exact dev dependency.
 2. Run the package's own installer: `eslint-plugin-raula install --eslint --agents-md`.
-3. Add `@biomejs/biome` as an exact dev dependency.
-4. Run `biome init`.
-5. Run the `lint` script.
-6. Run the `format` script.
-7. `git add .`
-8. `git commit -m "initialized raula"`
-
-Before running the `format` script, ensure `package.json` has a format script:
-
-```json
-"format": "biome format --write ."
-```
+3. In `biome.json` or `biome.jsonc`, set `formatter.indentStyle` to `"tab"` while preserving the rest of the configuration.
+4. Run the `lint` script.
+5. Run the `format` script.
+6. `git add .`
+7. `git commit -m "initialized raula"`
 
 The pnpm-specific `--config.minimumReleaseAge=0` flag bypasses pnpm's minimum-release-age gate; it has no equivalent on npm/yarn/bun and should be omitted for those.
 
 ## Notes
 
 Run the commands yourself one step at a time rather than delegating the full flow to a shell script. This makes it easier to handle interactive prompts, approve build scripts, and resume cleanly after partial failures.
-
-If an install step fails because the package manager blocked or ignored a native dependency's build script (e.g. `sharp`, `unrs-resolver`), look up that package manager's current mechanism for trusting/allowing build scripts (pnpm: `approve-builds`; bun: `pm trust`; yarn/npm vary by version) and retry, rather than assuming the pnpm-specific steps above apply.
 
 If a command fails partway through, inspect the output, fix the concrete problem in the generated app, then continue from the failed step without recreating the project unless the user asks for a clean retry.
