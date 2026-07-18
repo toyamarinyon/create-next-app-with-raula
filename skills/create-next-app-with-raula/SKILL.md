@@ -1,25 +1,40 @@
 ---
 name: create-next-app-with-raula
-description: "Scaffold a new Next.js application with create-next-app in a user-specified directory or, when no target path is given, the current directory; then install and initialize eslint-plugin-raula, run lint and format, and commit the initialized app. Supports pnpm, npm, yarn, and bun. Use when the user asks to start, create, bootstrap, or initialize a Next.js app with raula/eslint-plugin-raula."
+description: "Scaffold a new Next.js application with create-next-app in a user-specified directory or, when no target path is given, the current directory; then install and initialize eslint-plugin-raula, run lint and format, and commit the initialized app. Supports selecting pnpm, npm, yarn, or bun and a Next.js release tag or exact version. Use when the user asks to start, create, bootstrap, or initialize a Next.js app with raula/eslint-plugin-raula."
 ---
 
 # Create Next App With Raula
 
+## Supported inputs
+
+Support exactly these user-configurable inputs:
+
+| Input | Accepted values | Default |
+|---|---|---|
+| Target directory | A directory path | `.` |
+| Package manager | `pnpm`, `npm`, `yarn`, or `bun` | `pnpm` |
+| Next.js version | An npm dist-tag such as `latest`, `preview`, or `canary`, or an exact version such as `16.3.0-preview.6` | `latest` |
+
+When asked what this skill supports or what can be configured, answer from this table. Treat all other setup choices as fixed by this skill; do not offer them as configurable inputs.
+
 ## Workflow
 
-Determine the package manager and target directory before running `create-next-app`:
+Determine the three supported inputs before running `create-next-app`:
 
 - If the user names a package manager (pnpm, npm, yarn, bun), use it. Otherwise default to pnpm.
 - If the user gives a path, pass that path to `create-next-app`.
 - If the user does not give a path, pass `.` to `create-next-app` and use the current working directory.
+- If the user gives a Next.js dist-tag or exact version, use it. Otherwise default to `latest`.
 - Do not ask for a project name. The target directory is the project directory.
 - Before scaffolding into an existing directory, inspect it. If it contains files unrelated to this setup, stop and ask the user whether to continue, choose another directory, or clean it up.
 
-Every command below depends on the chosen package manager. Use this table to translate each step:
+Set `create-next-app-package` to `create-next-app@<next-version>`. For example, use `create-next-app@latest`, `create-next-app@preview`, `create-next-app@canary`, or `create-next-app@16.3.0-preview.6`.
+
+Every command below depends on the chosen package manager. Substitute `create-next-app-package` and target in this table, then append the fixed scaffold flags shown below:
 
 | Step | pnpm | npm | yarn (classic) | bun |
 |---|---|---|---|---|
-| Scaffold | `pnpm create next-app@latest <target> ... --use-pnpm --skip-install` | `npx create-next-app@latest <target> ... --use-npm --skip-install` | `yarn create next-app <target> ... --use-yarn --skip-install` | `bunx create-next-app@latest <target> ... --use-bun --skip-install` |
+| Scaffold | `pnpm create <create-next-app-package> <target> --use-pnpm` | `npx <create-next-app-package> <target> --use-npm` | `yarn create <create-next-app-package> <target> --use-yarn` | `bunx <create-next-app-package> <target> --use-bun` |
 | Install deps | `pnpm install` | `npm install` | `yarn install` | `bun install` |
 | Add exact dev dependency | `pnpm add -DE <pkg>@latest --config.minimumReleaseAge=0` | `npm install -D -E <pkg>@latest` | `yarn add -D -E <pkg>@latest` | `bun add -d --exact <pkg>@latest` |
 | Run a package's bin | `pnpm <pkg> <args>` | `npx <pkg> <args>` | `yarn <pkg> <args>` | `bunx <pkg> <args>` |
@@ -32,6 +47,8 @@ Initialize the app (fill in the scaffold command from the table above):
 ```
 
 Use the create-next-app options exactly as shown above, including `--skip-install`. Without it, a failure during `create-next-app`'s own install step aborts the scaffold before files like AGENTS.md/CLAUDE.md are written. Skipping the install decouples scaffolding from installing, so the scaffold always completes.
+
+The TypeScript, empty template, App Router, ESLint, Biome, Tailwind CSS, React Compiler, and skip-install choices are fixed. Do not change or prompt for them unless the user explicitly asks to modify the skill itself.
 
 After `create-next-app` finishes, change into the generated app directory before running the remaining commands. If the target was `.`, stay in the current working directory.
 

@@ -62,13 +62,37 @@ The skill does not ask for a project name. If you provide a path, that directory
 is the project directory. If you do not provide a path, the current working
 directory is the project directory.
 
+### Supported inputs
+
+The skill supports exactly three user-configurable inputs:
+
+| Input | Accepted values | Default |
+|---|---|---|
+| Target directory | A directory path | `.` |
+| Package manager | `pnpm`, `npm`, `yarn`, or `bun` | `pnpm` |
+| Next.js version | A dist-tag such as `latest`, `preview`, or `canary`, or an exact version | `latest` |
+
+For example:
+
+```text
+create a Next.js preview app with raula in ./my-app using bun
+```
+
+All other scaffold choices are fixed by the skill.
+
 ## Workflow
 
-The setup passes the target directory directly to `create-next-app`:
+The setup passes the selected Next.js version and target directory directly to
+`create-next-app`. For example, the default pnpm/latest combination is:
 
 ```bash
-pnpm create next-app@latest <target-directory-or-.> --ts --empty --app --eslint --biome --tailwind --react-compiler --pnpm
+pnpm create next-app@latest <target-directory-or-.> --ts --empty --app --eslint --biome --tailwind --react-compiler --use-pnpm --skip-install
 ```
+
+For a Preview release, it uses `create-next-app@preview`; exact versions such as
+`create-next-app@16.3.0-preview.6` are also accepted. TypeScript, the empty
+template, App Router, ESLint, Biome, Tailwind CSS, React Compiler, and
+`--skip-install` remain fixed.
 
 Then it changes into the generated app directory and continues:
 
